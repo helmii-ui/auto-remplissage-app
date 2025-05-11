@@ -9,18 +9,18 @@ df = pd.read_excel(excel_file)
 st.title("Auto-fill Example")
 
 # Input for the order number (which can contain both numbers and text)
-order_input = st.text_input("Enter Order Number (or ID)", "")
+order_input = st.text_input("Enter OF", "")
 
 # Strip extra spaces from user input and Excel data, and convert to lowercase for case-insensitive matching
 order_input_clean = order_input.strip().lower()
 
 # Ensure the 'OrderNumber' column is also cleaned (strip spaces and convert to lowercase)
-df['OrderNumber_clean'] = df['OrderNumber'].str.strip().str.lower()
+df['OF'] = df['OF'].str.strip().str.lower()
 
 # Check if the cleaned input exists in the cleaned 'OrderNumber' column
-if order_input_clean in df['OrderNumber_clean'].values:
+if order_input_clean in df['OF'].values:
     # Fetch the row with the matching order number
-    order_info = df[df['OrderNumber_clean'] == order_input_clean].iloc[0]
+    order_info = df[df['OF'] == order_input_clean].iloc[0]
 
     # Auto-fill the fields based on the order number
     st.text_input("Client", value=order_info["Client"], disabled=True)  # Replace 'Client' with your actual column name
