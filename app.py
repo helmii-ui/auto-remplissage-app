@@ -1,42 +1,25 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
 
-st.set_page_config(page_title="Auto-remplissage Commande", layout="centered")
+# Load Excel data (make sure to replace with your actual file path)
+excel_file = "Commandes.xlsx"  # Path to your Excel file
+df = pd.read_excel(excel_file)
 
-# Fonction pour charger le fichier Excel
-@st.cache_data
-def load_data():
-    df = pd.read_excel("Commandes.xlsx")
-    # Nettoyer les noms de colonnes (supprimer les espaces, tout en minuscules)
-    df.columns = df.columns.str.strip().str.lower()
-    return df
+# Streamlit UI
+st.title("Auto-fill Example")
 
-df = load_data()
-st.title("🔁 Formulaire avec Auto-remplissage")
-st.write("📄 Colonnes trouvées :", df.columns.tolist())
+# Input for the order number (number column could be order number, or operator ID)
+order_number = st.number_input("Enter Order Number", min_value=1)
 
-# Saisie du numéro de commande (OF)
-commande_num = st.text_input("🔢 Entrez le numéro de commande (OF)")
+# Check if the order number exists in the DataFrame
+if order_number in df['OF'].values:  # Replace 'OrderNumber' with your actual column name
+    # Fetch the row with the matching order number
+    order_info = df[df['OF'] == order_number].iloc[0]
 
-if commande_num:
-    commande_info = df[df["of"].astype(str) == commande_num.strip()]
-    if not commande_info.empty:
-        commande_info = commande_info.iloc[0]
-
-        # Champs remplis automatiquement
-        st.text_input("Client", value=commande_info.get("client", ""), disabled=True)
-        st.text_input("Tissu", value=commande_info.get("tissu", ""), disabled=True)
-        st.text_input("Code Rouleau", value=commande_info.get("code rouleau", ""), disabled=True)
-        st.text_input("Longueur", value=commande_info.get("longueur", ""), disabled=True)
-        st.text_input("Nombre de plis", value=commande_info.get("nombre de plis", ""), disabled=True)
-
-        # Saisie libre pour autres champs
-        operateur = st.text_input("Nom de l'opérateur")
-        matricule = st.text_input("Matricule")
-        heure_debut = st.time_input("Heure de début")
-        heure_fin = st.time_input("Heure de fin")
-
-        if st.button("✅ Enregistrer"):
-            st.success("Données enregistrées avec succès (fonction de sauvegarde à ajouter).")
-    else:
-        st.error("❌ Commande non trouvée. Vérifiez le numéro (OF) saisi.")
+    # Auto-fill the fields based on the order number
+    st.text_input("Client", value=order_info["Client"], disabled=True)  # Replace 'Client' with your actual column name
+    st.text_input("Tissu", value=order_info["Tissu"], disabled=True)  # Replace 'Tissu' with your actual column name
+    st.text_input("Code Rouleau", value=order_info["CodeRouleau"], disabled=True)  # Replace 'CodeRouleau' with your actual column name
+    st.number_input("Longueur Matelas", value=order_info["LongueurMatelas"], disabled=True)  # Replace 'LongueurMatelas' with your actual column name
+else:
+    st.warning("Order number not found.")
