@@ -13,7 +13,7 @@ df = load_reference_data()
 st.title("Interface de saisie intelligente - Atelier de coupe")
 
 # 🔢 Numéro de commande
-commande_num = st.text_input("Numéro de commande (OF)")
+commande_num = st.text_input("OF")
 
 # Données à remplir automatiquement
 if commande_num:
