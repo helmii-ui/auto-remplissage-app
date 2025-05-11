@@ -1,1 +1,45 @@
+OF	Modèle	Typologie	Description du Produit	Priorité	F.S.	Rec. FS	Proto	Transfert Bandes	Transfert emblem	Transf. realisé	Prep, Fourn,	Fourn. livrée	Tissu livré	Qté demandée	Temps Gamme	Effectif	Temps passage de commande	Chaine	Coupe	Sortie chaine	Reste	Emb,	Retard	
+Proteq	P009488	CAR.002105	Gilet H, dos	CAR.002105											69	33	13	4,17	5	69	69	0		
+Proteq	P009488	CAR.002105	Gilet H,dev	CAR.002105											69	23	13	2,91	5	69	69	0		
+Proteq	P009488	CAR.002105	Gilet F, dos	CAR.002105											9	33	13	0,54	5	9	9	0		
+Proteq	P009488	CAR.002105	Gilet F, dev	CAR.002105											9	23	13	0,38	5	9	9	0		
+Proteq	P009490	CAR.002105	Gilet H, dos	CAR.002105											321	33	13	19,4	5	321	321	0		
+Proteq	P009490	CAR.002105	Gilet H, dev	CAR.002105											321	23	13	13,52	5	321	239	-82		
+Proteq	P009490	CAR.002105	Gilet F, dos	CAR.002105											183	33	13	11,06	5			-183		
+Proteq	P009490	CAR.002105	Gilet F, dev	CAR.002105											183	23	13	7,71	5			-183		
+Proteq	P009488	CAR.002144	Gilet H, dos	CAR.002144											138	27	13	6,82	5			-138		
+Proteq	P009488	CAR.002144	Gilet H, dev	CAR.002144											138	55	13	13,9	5			-138		
+Proteq	P009488	CAR.002144	Gilet F, dev	CAR.002144											18	55	13	1,81	5			-18		
+Proteq	P009488	CAR.002144	Gilet F, dos	CAR.002144											18	27	13	0,89	5			-18		
+Proteq	P009558	CAR.002144	Gilet H, dos	CAR.002144											140	27	13	6,92	5	140	140	0		
+Proteq	P009558	CAR.002144	Gilet H, dev	CAR.002144											140	55	13	14,1	5	140	140	0		
+Proteq	P009558	CAR.002144	Gilet F, dev	CAR.002144											2	55	13	0,2	5	2	2	0		
+Proteq	P009558	CAR.002144	Gilet F, dos	CAR.002144											2	27	13	0,1	5	2	2	0		
+Proteq	P009593	CTB.01	sac	CTB.01											500	38,55	13	35,3	5	500		-500		
+Proteq	P009490	CAR.002108	Gilet H, dos	CAR.002108											158	27	13	7,81	5	158		-158		
+Proteq	P009490	CAR.002108	Gilet H, dev	CAR.002108											158	28	13	8,1	5	158		-158		
+Proteq	P009490	CAR.002108	Gilet F, dev	CAR.002108											92	28	16	3,83	5	92	92	0		
+Proteq	P009490	CAR.002108	Gilet F, dos	CAR.002108											92	27	16	3,7	5	92	92	0		
+PWG	24002521-24002526	B241NXCYW	veste	B241NXCYW	URG							✔	✔	✔	225	80	20	21,43	5	225		-225		
+PWG	24002492	B241NXCYW	veste	B241NXCYW	URG							✔	✔	✔	5	80	20	0,48	5			-5		
+Proteq	P009652	CAR.002105	Gilet H, dos	CAR.002105											32	33	16	1,57	5			-32		
+Proteq	P009652	CAR.002105	Gilet H, dev	CAR.002105											32	23	16	1,1	5			-32		
+Proteq	P009652	CAR.002105	Gilet F, dev	CAR.002105											11	23	16	0,38	5			-11		
+Proteq	P009652	CAR.002105	Gilet F, dos	CAR.002105											11	33	16	0,54	5			-11		
+Proteq	P009652	CAR.002144	Gilet H, dos	CAR.002144											60	27	16	2,41	5			-60		
+Proteq	P009652	CAR.002144	Gilet H, dev	CAR.002144											60	55	16	4,91	5			-60		
+Proteq	P009652	CAR.002144	Gilet F, dev	CAR.002144											18	55	16	1,47	5			-18		
+Proteq	P009652	CAR.002144	Gilet F, dos	CAR.002144											18	27	16	0,72	5			-18		
+Proteq	P009731	CAR.002105	Gilet H, dev	CAR.002105											129	23	16	4,42	5					
+Proteq	P009731	CAR.002105	Gilet H, dos	CAR.002105											131	33	16	6,43	5					
+Proteq	P009731	CAR.002105	Gilet F, dos	CAR.002105											51	33	16	2,5	5					
+Proteq	P009731	CAR.002105	Gilet F,dev	CAR.002105											51	23	16	1,75	5					
+Proteq	P009732	CAR.002105	Gilet H, dev	CAR.002105											76	23	16	2,6	5					
+Proteq	P009732	CAR.002105	Gilet H, dos	CAR.002105											76	33	16	3,73	5					
+Proteq	P009732	CAR.002105	Gilet F,dos	CAR.002105											7	33	16	0,34	5					
+Proteq	P009732	CAR.002105	Gilet F, dev	CAR.002105											7	23	16	0,24	5					
+Proteq	P009753	CAR.002105	Gilet	CAR.002105											30		16	0	5					
+Proteq	P009732	CAR.002144	Gilet H, dev	CAR.002144											152	55	16	12,44	5					
+Proteq	P009732	CAR.002144	Gilet H, dos	CAR.002144											152	27	16	6,11	5					
+Proteq	P009732	CAR.002144	Gilet F, dos	CAR.002144											14	27	16	0,56	5					
 
