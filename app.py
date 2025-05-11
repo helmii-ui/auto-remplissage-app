@@ -19,7 +19,7 @@ st.write("📄 Colonnes trouvées :", df.columns.tolist())
 commande_num = st.text_input("🔢 Entrez le numéro de commande (OF)")
 
 if commande_num:
-    commande_info = df[df["OF"].astype(str) == commande_num.strip()]
+    commande_info = df[df["of"].astype(str) == commande_num.strip()]
     if not commande_info.empty:
         commande_info = commande_info.iloc[0]
 
