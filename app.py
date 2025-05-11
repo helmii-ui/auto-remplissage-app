@@ -8,13 +8,13 @@ df = pd.read_excel(excel_file)
 # Streamlit UI
 st.title("Auto-fill Example")
 
-# Input for the order number (number column could be order number, or operator ID)
-order_number = st.number_input("Enter Order Number", min_value=1)
+# Input for the order number (which can contain both numbers and text)
+order_input = st.text_input("Enter Order Number (or ID)", "")
 
-# Check if the order number exists in the DataFrame
-if order_number in df['OF'].values:  # Replace 'OrderNumber' with your actual column name
+# Check if the input exists in the DataFrame (order column can contain text or numbers)
+if order_input in df['OF'].values:  # Replace 'OrderNumber' with your actual column name
     # Fetch the row with the matching order number
-    order_info = df[df['OF'] == order_number].iloc[0]
+    order_info = df[df['OF'] == order_input].iloc[0]
 
     # Auto-fill the fields based on the order number
     st.text_input("Client", value=order_info["Client"], disabled=True)  # Replace 'Client' with your actual column name
