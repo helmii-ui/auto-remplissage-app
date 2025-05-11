@@ -8,7 +8,7 @@ st.title("Auto-remplissage des données par numéro de commande")
 # Charger les données depuis Excel
 @st.cache_data
 def load_reference_data():
-    return pd.read_excel("commandes.xlsx")
+    return pd.read_excel("Commandes.xlsx")
 
 df = load_reference_data()
 
