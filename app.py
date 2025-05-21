@@ -135,6 +135,4 @@ elif input_matricule == default_operator.get("matricule"):
         st.info("Aucune donnée enregistrée.")
 
 # Matricule incorrect
-else:
-    if input_matricule:
-        st.error("Matricule incorrect. Accès refusé.")
+elif input_matricule == default_operator.get("matricule"):
