@@ -1,18 +1,40 @@
 import streamlit as st
 import pandas as pd
+from datetime import datetime
+from sqlalchemy import create_engine, Table, Column, Integer, String, Float, MetaData, Time, Date
 import json
 import os
-from datetime import datetime
-from sqlalchemy import create_engine
 
-# --- Configuration fichiers ---
+# Base SQLite
+DB_FILE = "donnees.db"
 CONFIG_FILE = "config.json"
 CHEF_MATRICULE = "chef123"  # Matricule du chef
-DB_FILE = "donnees.db"
-TABLE_NAME = "donnees_coupe"
+OPERATOR_MATRICULE = "1234"  # Matricule fixe de l’opérateur
 
 # Connexion à SQLite
-engine = create_engine(f'sqlite:///{DB_FILE}')
+engine = create_engine(f"sqlite:///{DB_FILE}")
+metadata = MetaData()
+
+# Table des données
+table_donnees = Table(
+    "coupe_data", metadata,
+    Column("id", Integer, primary_key=True),
+    Column("Date", Date),
+    Column("Client", String),
+    Column("Commande", String),
+    Column("Tissu", String),
+    Column("CodeRouleau", String),
+    Column("LongueurMatelas", Float),
+    Column("NombrePlis", Integer),
+    Column("HeureDebut", Time),
+    Column("HeureFin", Time),
+    Column("TempsMatelas", String),
+    Column("NomOperateur", String),
+    Column("Matricule", String),
+)
+
+# Créer la table si elle n'existe pas
+metadata.create_all(engine)
 
 # Liste initiale des clients
 default_clients = ["HAVEP", "PWG", "Protec", "IS3", "MOERMAN", "TOYOTA", "Autre"]
@@ -20,12 +42,12 @@ if "clients" not in st.session_state:
     st.session_state.clients = default_clients.copy()
 
 # Charger config opérateur
-default_operator = {"nom": "najwa", "matricule": "1234"}
+default_operator = {"nom": "Ali", "matricule": OPERATOR_MATRICULE}
 if os.path.exists(CONFIG_FILE):
     with open(CONFIG_FILE, "r") as f:
         default_operator = json.load(f)
 
-# Interface
+# Titre
 st.title("Interface - Atelier de Coupe")
 
 # Authentification
@@ -35,61 +57,45 @@ input_matricule = st.text_input("Entrer votre matricule", type="password")
 if input_matricule == CHEF_MATRICULE:
     st.success("Bienvenue Chef (accès lecture seule)")
 
+    with engine.connect() as conn:
+        df = pd.read_sql_table("coupe_data", conn)
+
     st.subheader("Filtrer les données")
-    client_filter = st.selectbox("Filtrer par client", options=["Tous"] + st.session_state.clients)
+    client_filter = st.selectbox("Filtrer par client", ["Tous"] + st.session_state.clients)
     date_filter = st.date_input("Filtrer par date", value=datetime.today(), max_value=datetime.today())
 
-    # Charger les données depuis SQLite
-    try:
-        df = pd.read_sql_table(TABLE_NAME, con=engine)
-    except:
-        df = pd.DataFrame()
+    # Filtrage
+    df['Date'] = pd.to_datetime(df['Date']).dt.date
+    if client_filter != "Tous":
+        df = df[df['Client'] == client_filter]
+    df = df[df['Date'] == date_filter]
 
-    # Filtrer
-    if not df.empty:
-        if client_filter != "Tous":
-            df = df[df['Client'] == client_filter]
-        df['Date'] = pd.to_datetime(df['Date']).dt.date
-        df = df[df['Date'] == date_filter]
-
-    # Afficher
-    st.subheader("Données enregistrées")
+    st.subheader("Données filtrées")
     st.dataframe(df)
 
-    # Export
+    # Exportation
     st.subheader("Exporter les données")
-    export_option = st.selectbox("Exporter en format", options=["Sélectionner", "CSV", "Excel"])
-
+    export_option = st.selectbox("Exporter en format", ["Sélectionner", "CSV", "Excel"])
     if export_option == "CSV":
-        st.download_button(
-            label="Télécharger en CSV",
-            data=df.to_csv(index=False),
-            file_name="donnees_filtrees.csv",
-            mime="text/csv"
-        )
+        st.download_button("Télécharger CSV", data=df.to_csv(index=False), file_name="donnees.csv", mime="text/csv")
     elif export_option == "Excel":
-        st.download_button(
-            label="Télécharger en Excel",
-            data=df.to_excel(index=False),
-            file_name="donnees_filtrees.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+        st.download_button("Télécharger Excel", data=df.to_excel(index=False), file_name="donnees.xlsx", mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 # Accès opérateur
-elif input_matricule == default_operator.get("matricule"):
+elif input_matricule == OPERATOR_MATRICULE:
     st.success("Accès opérateur autorisé.")
 
     with st.form("form_saisie"):
-        date = st.date_input("Date", value=datetime.now())
+        date = st.date_input("Date", value=datetime.today())
+        client_selection = st.selectbox("Client", st.session_state.clients)
 
-        client_selection = st.selectbox("Client", options=st.session_state.clients)
         if client_selection == "Autre":
             nouveau_client = st.text_input("Nom du nouveau client")
             if nouveau_client:
                 client = nouveau_client
                 if nouveau_client not in st.session_state.clients:
                     st.session_state.clients.insert(-1, nouveau_client)
-                    st.success(f"Client ajouté à la liste : {nouveau_client}")
+                    st.success(f"Client ajouté : {nouveau_client}")
             else:
                 client = ""
         else:
@@ -103,7 +109,6 @@ elif input_matricule == default_operator.get("matricule"):
         debut = st.time_input("Heure Début")
         fin = st.time_input("Heure Fin")
         temps = st.text_input("Temps de Matelas (hh:mm)")
-
         operateur = st.text_input("Nom Opérateur", value=default_operator.get("nom", ""))
         matricule = input_matricule
 
@@ -112,27 +117,24 @@ elif input_matricule == default_operator.get("matricule"):
             if not client:
                 st.error("Veuillez entrer un nom de client valide.")
             else:
-                new_row = pd.DataFrame([[date, client, commande, tissu, rouleau,
-                                         longueur, plis, debut, fin, temps, operateur, matricule]],
-                                       columns=["Date", "Client", "N° Commande", "Tissu", "Code Rouleau",
-                                                "Longueur Matelas", "Nombre de Plis", "Heure Début",
-                                                "Heure Fin", "Temps Matelas", "Nom Opérateur", "Matricule"])
-                # Enregistrer dans la base SQLite
-                new_row.to_sql(TABLE_NAME, con=engine, if_exists="append", index=False)
+                with engine.connect() as conn:
+                    conn.execute(table_donnees.insert().values(
+                        Date=date, Client=client, Commande=commande, Tissu=tissu,
+                        CodeRouleau=rouleau, LongueurMatelas=longueur, NombrePlis=plis,
+                        HeureDebut=debut, HeureFin=fin, TempsMatelas=temps,
+                        NomOperateur=operateur, Matricule=matricule
+                    ))
 
-                # Sauvegarder config opérateur
                 with open(CONFIG_FILE, "w") as f:
                     json.dump({"nom": operateur, "matricule": matricule}, f)
 
                 st.success("✅ Données enregistrées avec succès !")
 
-    # Affichage tableau
-    st.subheader("Données enregistrées")
-    try:
-        df = pd.read_sql_table(TABLE_NAME, con=engine)
+    st.subheader("Toutes les données")
+    with engine.connect() as conn:
+        df = pd.read_sql_table("coupe_data", conn)
         st.dataframe(df)
-    except:
-        st.info("Aucune donnée enregistrée.")
 
-# Matricule incorrect
-elif input_matricule == default_operator.get("matricule"):
+else:
+    if input_matricule:
+        st.error("Matricule incorrect. Accès refusé.")
