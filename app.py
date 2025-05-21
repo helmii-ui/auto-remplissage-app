@@ -1,74 +1,147 @@
 import streamlit as st
 import pandas as pd
-import sqlite3
+import json
+import os
 from datetime import datetime
 
-st.set_page_config(page_title="Saisie Données Coupe", layout="centered")
-st.title("📝 Interface de Saisie - Département Coupe")
+# Fichiers
+DATA_FILE = "donnees.xlsx"
+CONFIG_FILE = "config.json"
 
-# --- Formulaire de saisie ---
-with st.form("formulaire"):
-    col1, col2 = st.columns(2)
-    with col1:
-        date = st.date_input("Date", value=datetime.today())
-        client = st.text_input("Client")
+# Matricule du chef de coupe
+CHEF_MATRICULE = "chef123"  # Matricule du chef (à personnaliser)
+
+# Liste initiale des clients
+default_clients = ["HAVEP", "PWG", "Protec", "IS3","MOERMAN","TOYOTA", "Autre"]
+if "clients" not in st.session_state:
+    st.session_state.clients = default_clients.copy()
+
+# Initialiser Excel si besoin
+if not os.path.exists(DATA_FILE):
+    df_init = pd.DataFrame(columns=[
+        "Date", "Client", "N° Commande", "Tissu", "Code Rouleau", 
+        "Longueur Matelas", "Nombre de Plis", "Heure Début", 
+        "Heure Fin", "Temps Matelas", "Nom Opérateur", "Matricule"
+    ])
+    df_init.to_excel(DATA_FILE, index=False)
+
+# Charger config opérateur
+default_operator = {"nom": "", "matricule": ""}
+if os.path.exists(CONFIG_FILE):
+    with open(CONFIG_FILE, "r") as f:
+        default_operator = json.load(f)
+
+# Titre de l'interface
+st.title("Interface - Atelier de Coupe")
+
+# Authentification
+input_matricule = st.text_input("Entrer votre matricule", type="password")
+
+# Accès chef de coupe
+if input_matricule == CHEF_MATRICULE:
+    st.success("Bienvenue Chef (accès lecture seule)")
+
+    # Filtrage des données
+    st.subheader("Filtrer les données")
+    client_filter = st.selectbox("Filtrer par client", options=["Tous"] + st.session_state.clients)
+    date_filter = st.date_input("Filtrer par date", value=datetime.today(), max_value=datetime.today())
+
+    # Lire les données
+    df = pd.read_excel(DATA_FILE)
+
+    # Filtrer les données en fonction des choix
+    if client_filter != "Tous":
+        df = df[df['Client'] == client_filter]
+
+    df['Date'] = pd.to_datetime(df['Date'])
+    df = df[df['Date'] == pd.to_datetime(date_filter)]
+
+    # Afficher les données filtrées
+    st.subheader("Données enregistrées")
+    st.dataframe(df)
+
+    # Option d'exportation
+    st.subheader("Exporter les données")
+    export_option = st.selectbox("Exporter en format", options=["Sélectionner", "CSV", "Excel"])
+    
+    if export_option == "CSV":
+        st.download_button(
+            label="Télécharger en CSV",
+            data=df.to_csv(index=False),
+            file_name="donnees_filtrees.csv",
+            mime="text/csv"
+        )
+    elif export_option == "Excel":
+        st.download_button(
+            label="Télécharger en Excel",
+            data=df.to_excel(index=False),
+            file_name="donnees_filtrees.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+
+elif input_matricule == default_operator.get("matricule"):
+    st.success("Accès opérateur autorisé.")
+
+    with st.form("form_saisie"):
+        date = st.date_input("Date", value=datetime.now())
+
+        # Liste déroulante client
+        client_selection = st.selectbox("Client", options=st.session_state.clients)
+
+        # Si "Autre", proposer un champ pour ajouter
+        if client_selection == "Autre":
+            nouveau_client = st.text_input("Nom du nouveau client")
+            if nouveau_client:
+                client = nouveau_client
+                if nouveau_client not in st.session_state.clients:
+                    st.session_state.clients.insert(-1, nouveau_client)
+                    st.success(f"Client ajouté à la liste : {nouveau_client}")
+            else:
+                client = ""
+        else:
+            client = client_selection
+
         commande = st.text_input("N° Commande")
         tissu = st.text_input("Tissu")
-        code_rouleau = st.text_input("Code Rouleau")
-    with col2:
-        longueur_matelas = st.text_input("Longueur Matelas (m)")
-        nombre_plis = st.text_input("Nombre de Plis")
-        heure_debut = st.time_input("Heure Début")
-        heure_fin = st.time_input("Heure Fin")
-        temps_matelas = st.text_input("Temps de Matelas (hh:mm)")
-    
-    nom_operateur = st.text_input("Nom Opérateur")
+        rouleau = st.text_input("Code Rouleau")
+        longueur = st.number_input("Longueur Matelas (m)", min_value=0.0, step=0.1)
+        plis = st.number_input("Nombre de Plis", min_value=1, step=1)
+        debut = st.time_input("Heure Début")
+        fin = st.time_input("Heure Fin")
+        temps = st.text_input("Temps de Matelas (hh:mm)")
 
-    submit = st.form_submit_button("✅ Valider")
+        operateur = st.text_input("Nom Opérateur", value=default_operator.get("nom", ""))
+        matricule = input_matricule
 
-# --- Connexion à la base SQLite ---
-conn = sqlite3.connect("donnees.db")
-cursor = conn.cursor()
+        submitted = st.form_submit_button("Valider")
+        if submitted:
+            if not client:
+                st.error("Veuillez entrer un nom de client valide.")
+            else:
+                # Ajouter ligne
+                new_row = pd.DataFrame([[
+                    date, client, commande, tissu, rouleau, longueur, plis, 
+                    debut, fin, temps, operateur, matricule
+                ]], columns=[
+                    "Date", "Client", "N° Commande", "Tissu", "Code Rouleau", 
+                    "Longueur Matelas", "Nombre de Plis", "Heure Début", 
+                    "Heure Fin", "Temps Matelas", "Nom Opérateur", "Matricule"
+                ])
+                df = pd.read_excel(DATA_FILE)
+                df = pd.concat([df, new_row], ignore_index=True)
+                df.to_excel(DATA_FILE, index=False)
 
-# Création de la table si elle n'existe pas
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS donnees (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        Date TEXT,
-        Client TEXT,
-        Commande TEXT,
-        Tissu TEXT,
-        CodeRouleau TEXT,
-        LongueurMatelas TEXT,
-        NombrePlis TEXT,
-        HeureDebut TEXT,
-        HeureFin TEXT,
-        TempsMatelas TEXT,
-        Operateur TEXT,
-        Matricule TEXT
-    )
-""")
-conn.commit()
+                # Mettre à jour config
+                with open(CONFIG_FILE, "w") as f:
+                    json.dump({"nom": operateur, "matricule": matricule}, f)
 
-# --- Enregistrement dans la base ---
-if submit:
-    cursor.execute("""
-        INSERT INTO donnees (
-            Date, Client, Commande, Tissu, CodeRouleau,
-            LongueurMatelas, NombrePlis, HeureDebut, HeureFin,
-            TempsMatelas, Operateur, Matricule
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        str(date), client, commande, tissu, code_rouleau,
-        longueur_matelas, nombre_plis, str(heure_debut), str(heure_fin),
-        temps_matelas, nom_operateur, "1234"  # Matricule fixe
-    ))
-    conn.commit()
-    st.success("✅ Données enregistrées avec succès !")
+                st.success("✅ Données enregistrées avec succès !")
 
-# --- Affichage des données enregistrées ---
-st.subheader("📊 Toutes les données")
-df = pd.read_sql_query("SELECT * FROM donnees", conn)
-st.dataframe(df)
+    # 🗂️ Affichage tableau
+    st.subheader("Données enregistrées")
+    df = pd.read_excel(DATA_FILE)
+    st.dataframe(df)
 
-conn.close()
+else:
+    if input_matricule:
+        st.error("Matricule incorrect. Accès refusé.")
