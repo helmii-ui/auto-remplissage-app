@@ -20,7 +20,7 @@ if "clients" not in st.session_state:
     st.session_state.clients = default_clients.copy()
 
 # Charger config opérateur
-default_operator = {"najwa": "", "1234": ""}
+default_operator = {"nom": "najwa", "matricule": "1234"}
 if os.path.exists(CONFIG_FILE):
     with open(CONFIG_FILE, "r") as f:
         default_operator = json.load(f)
