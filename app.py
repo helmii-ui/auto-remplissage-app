@@ -261,7 +261,7 @@ if input_matricule == CHEF_MATRICULE:
             st.error(f"Erreur lors de la préparation de l'exportation: {e}")
 
 # Operator access
-elif input_matricule and input_matricule == default_operator.get("matricule"):
+elif input_matricule and input_matricule == default_operator.get("12345"):
     st.success(f"Bienvenue {default_operator.get('nom')}! Accès opérateur autorisé.")
     
     tab1, tab2 = st.tabs(["📝 Saisie des données", "📋 Consultation"])
